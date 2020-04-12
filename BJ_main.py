@@ -58,6 +58,8 @@ class DeckOfCards(object):
 #%%
 class GameParticipant(object):
 
+    """Base game participant class for holding data and shared functionality"""
+
     def __init__(self, chips, cards):
         self.chips = chips
         self.cards = cards
@@ -70,15 +72,13 @@ class GameParticipant(object):
     
     def clear_hand(self):
         self.cards.clear()
-
-    #Place bet
-    def place_bet(self,bet_amount):
-        if bet_amount <= self.chips:
-            return (bet_amount)
-        else:
-            return ("Not enough chips")
+            
+    def hit(self,deck):
+        player.pickup_card(deck.get_card())
 
 class Dealer(GameParticipant):  
+
+    """Dealer class - can hide a card""" 
 
     def __init__(self, cards):
         self.cards = cards
@@ -92,54 +92,123 @@ class Dealer(GameParticipant):
     def card_reveal(self):
         self.cards[-1] = self.hidden_card 
 
+class Player(GameParticipant):
+
+    """Player specific functionality - place a bet, stand""" 
+
+    def __init__(self, chips):
+        self.cards = []
+        self.chips = chips
+        super(Player, self).__init__(self.chips, self.cards)
+        self.standing = False
+
+    #Place bet
+    def place_bet(self,bet_amount):
+        if bet_amount <= self.chips:
+            return (bet_amount)
+        else:
+            return ("Not enough chips")
+    
+    def stand(self,is_standing):
+        self.standing = is_standing
+
 class GameBackend(object):
 
-    def __init__(self, player, dealer, deck):
+    """ Backend class for managing game functionality, participants and state. Communicates with frontend for i/o""" 
+    def __init__(self, player, dealer, deck, frontend):
         self.chips_on_table = 0
         self.player = player
         self.dealer = dealer
         self.deck = deck
+        self.frontend = frontend
+        self.bet = 0
 
-    def request_bet(self,amount):
-        amount = self.chips_on_table
+    def request_bet(self):
+        self.frontend.bet_amount()
+        amount = self.player.place_bet(int(self.frontend.player_input()))
+        if isinstance(amount,int):
+            self.bet = amount 
     
     def deal_cards_start(self):
         for i in range(2):
             self.player.pickup_card(self.deck.get_card())
             self.dealer.pickup_card(self.deck.get_card())
+        self.dealer.card_hidden()
+
+    def game_turn(self):        
+        if not self.player.standing: 
+            self.frontend.report_cards(self.player,self.dealer)
+        else:
+            self.frontend.report_cards(self.player,self.dealer)
+            self.frontend.card_reveal(self.dealer)
+            self.dealer.card_reveal()
+            self.frontend.report_cards(self.player,self.dealer)
+
+    def hit_or_stand(self):
+
+        self.frontend.hit_stand()
+        answer = self.frontend.player_input()
+
+        if answer in ["Hit", "hit", "hi"]:
+            self.player.hit(self.deck)
+        elif answer in ["Stand", "stand", "sta"]:
+            self.player.stand(True)
+    
+    #TODO: implement this
+    def compute_card_value(self,game_participant):
+        pass
 
 class GameFrontend(object):
 
-    def __init__(self, backend):
-        self.backend = backend
+    """Game frontend class for basic terminal based UX with minimal functionality to improve modularity 
+    text content is stored in class variable dict - but should be parsed in from a json stored seperately to allow for localislation"""
 
-    def cards_in_game(self, player_stand):
-        player_cards = f"Player cards: {self.backend.player.cards} "
-       
-        print (player_cards)
+    #TODO: parse this from json stored on dist instead to enable localislation. Investigate if it's possible to 'translate on the fly' from requested language
+    comms_strings = {
+        "s_report_cards":["Player's cards are: ", "Dealer's cards are: "],
+        "s_hit_stand": "Do you hit or do you stand?",
+        "s_bet_amount": "How much do you want to bet?",
+        "s_card_reveal": "Dealer's hidden card is: "
+        }
 
-        dealer_cards = f"Dealer cards: "
-
-        if not player_stand:
-            self.backend.dealer.card_hidden() 
-            print(f"{dealer_cards} {self.backend.dealer.cards}")
-        else:
-            self.backend.dealer.card_reveal()
-            print(self.backend.dealer.cards)
-
-
+    def __init__(self):
+        pass
+    
+    def report_cards(self,player,dealer):
+        pstring = self.comms_strings.get("s_report_cards")[0]
+        p_cards = f"{pstring}{player.cards}"
+        dstring = self.comms_strings.get("s_report_cards")[1]
+        d_cards = f"{dstring}{dealer.cards}"
+        print(f"{p_cards} and {d_cards}")
+    
+    def bet_amount(self):
+        print(self.comms_strings.get("s_bet_amount"))
+    
+    def player_input(self):
+        return(str(input())[0:10])
+    
+    def hit_stand(self):
+        print(self.comms_strings.get("s_hit_stand"))
+    
+    def card_reveal(self, dealer):
+        hcard = self.comms_strings.get("s_card_reveal")
+        print(f"{hcard} {dealer.hidden_card}")
+    
 #%%
+#test game
 dealer = Dealer([])
-player = GameParticipant(50,[])
+player = Player(50)
 dek = DeckOfCards()
 
-back = GameBackend(player,dealer,dek)
-ux = GameFrontend(back)
+ux = GameFrontend()
+back = GameBackend(player,dealer,dek,ux)
 
+#game loop 
+back.request_bet()
 back.deal_cards_start()
-ux.cards_in_game(False)
-
-
+back.game_turn()
+back.hit_or_stand()
+back.game_turn()
 
 
         
