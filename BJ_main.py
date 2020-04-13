@@ -7,6 +7,7 @@ class DeckOfCards(object):
     def __init__ (self):
         self.initialize_deck()
         self.cards = self.cards
+        self.picture_cards = {11:'jack', 12:'queen', 13:'king', 14:'ace'}
 
     #Get a full set of cards and shuffle them. 
     #TODO: Consider if shuffle should be separate
@@ -21,7 +22,7 @@ class DeckOfCards(object):
         num_cards_suite = 14
         cards = []
         for suite in ["spades", "clubs", "hearts", "diamonds"]:
-            value_suite = [(suite,x) for x in range(1,num_cards_suite)]
+            value_suite = [[suite,x] for x in range(1,num_cards_suite)]
             cards.append(value_suite)
         #flatten nested array
         cards = [item for sublist in cards for item in sublist]
@@ -36,7 +37,7 @@ class DeckOfCards(object):
     #TODO: clean up logic 
     #TODO: figure out why append the cards doesnt get the elements from self.cards 
     def get_card(self):
-        picture_cards = {11:'jack', 12:'queen', 13:'king', 14:'ace'}
+        #picture_cards = {11:'jack', 12:'queen', 13:'king', 14:'ace'}
         #the_cards = list()
         while len(self.cards) > 0:
             if len(self.cards) == 1:
@@ -49,8 +50,8 @@ class DeckOfCards(object):
                     the_card = self.cards.pop(get_random)
                     #the_cards.append(self.cards.pop(get_random))
                     #print(str(the_cards) + str(i))
-                    if the_card[1] in picture_cards:
-                        return(the_card[0],picture_cards.get(the_card[1]))
+                    if the_card[1] in self.picture_cards:
+                        return([the_card[0],self.picture_cards.get(the_card[1])])
                         
                     #the_cards.append((the_cards[i][0],picture_cards.get(the_cards[i][1])))
                     return(the_card)
@@ -63,6 +64,10 @@ class GameParticipant(object):
     def __init__(self, chips, cards):
         self.chips = chips
         self.cards = cards
+        self.cards_value = 0
+        self.soft_hand = False
+        self.blackjack = False
+        self.bust = False
         
     def get_cards(self):
         return(self.cards)
@@ -135,6 +140,24 @@ class GameBackend(object):
             self.dealer.pickup_card(self.deck.get_card())
         self.dealer.card_hidden()
 
+    def is_value_threshold(self,game_participant):
+        #Defauling to player value
+        value_threshold = 21
+        #If we're testing for value of dealer cards, set different threshold
+        if isinstance(game_participant,Dealer):
+            value_threshold = 16
+        
+        if game_participant.cards_value > value_threshold and game_participant.soft_hand == False:
+            game_participant.bust = True
+        elif game_participant.cards_value > value_threshold and game_participant.soft_hand == True: 
+            game_participant.cards_value = self.compute_soft_hand_value(game_participant)
+            if game_participant.cards_value > value_threshold:
+                game_participant.bust = True
+            else:
+                return(False)
+        else:
+            return(False)
+
     def game_turn(self):        
         if not self.player.standing: 
             self.frontend.report_cards(self.player,self.dealer)
@@ -153,15 +176,41 @@ class GameBackend(object):
             self.player.hit(self.deck)
         elif answer in ["Stand", "stand", "sta"]:
             self.player.stand(True)
-    
-    #TODO: implement this
+        
     def compute_card_value(self,game_participant):
-        pass
+        c_value = 0
+        for card in game_participant.cards:
+            if card[1] in self.deck.picture_cards.values():
+                if card[1] == "ace":
+                    game_participant.soft_hand = True
+                    card[1] = 11
+                else:
+                    card[1] = 10
+            c_value += card[1]
+        return(c_value)
+        
+    def compute_soft_hand_value(self,game_participant):
+        c_value = 0
+        for card in game_participant.cards:
+            if card[1] in self.deck.picture_cards.values():
+                if card[1] == "ace":
+                    card[1] = 1
+                else:
+                    card[1] = 10
+            c_value += card[1]
+        return(c_value)
 
+
+   #             if c_value > 21:
+   #         if game_participant.soft_hand:
+   #             i = game_participant.cards.index([,"ace"])
+   #             game_participant.cards[i]
+
+    
 class GameFrontend(object):
 
     """Game frontend class for basic terminal based UX with minimal functionality to improve modularity 
-    text content is stored in class variable dict - but should be parsed in from a json stored seperately to allow for localislation"""
+    text content is stored in class variable dict -  could in future be parsed in from a json stored seperately to allow for localislation"""
 
     #TODO: parse this from json stored on dist instead to enable localislation. Investigate if it's possible to 'translate on the fly' from requested language
     comms_strings = {
@@ -204,11 +253,15 @@ ux = GameFrontend()
 back = GameBackend(player,dealer,dek,ux)
 
 #game loop 
-back.request_bet()
+#back.request_bet()
 back.deal_cards_start()
-back.game_turn()
-back.hit_or_stand()
-back.game_turn()
+
+ux.report_cards(player,dealer)
+back.compute_card_value(player)
+
+#back.game_turn()
+#back.hit_or_stand()
+#back.game_turn()
 
 
         
