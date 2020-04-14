@@ -1,5 +1,6 @@
 #%%
 import random
+import time
 class DeckOfCards(object):
 
     """Deck of cards with shuffling and ability to pull a card while managing the number of cards left in deck"""
@@ -183,10 +184,12 @@ class GameBackend(object):
             if card[1] in self.deck.picture_cards.values():
                 if card[1] == "ace":
                     game_participant.soft_hand = True
-                    card[1] = 11
+                    c_value += 11
                 else:
-                    card[1] = 10
-            c_value += card[1]
+                    c_value += 10
+            if not isinstance(card[1], str):
+                c_value += int(card[1])
+        game_participant.cards_value = c_value
         return(c_value)
         
     def compute_soft_hand_value(self,game_participant):
@@ -194,10 +197,12 @@ class GameBackend(object):
         for card in game_participant.cards:
             if card[1] in self.deck.picture_cards.values():
                 if card[1] == "ace":
-                    card[1] = 1
+                    c_value += 1
                 else:
-                    card[1] = 10
-            c_value += card[1]
+                    c_value += 10
+            if not isinstance(card[1], str):
+                c_value += int(card[1])
+        game_participant.cards_value = c_value
         return(c_value)
 
 
@@ -255,9 +260,21 @@ back = GameBackend(player,dealer,dek,ux)
 #game loop 
 #back.request_bet()
 back.deal_cards_start()
+player.cards.append(["spades","ace"])
+player.cards.append(["spades","queen"])
 
 ux.report_cards(player,dealer)
-back.compute_card_value(player)
+cv = back.compute_card_value(player)
+print(cv)
+time.sleep(1)
+back.is_value_threshold(player)
+print(f"is player bust? {player.bust}")
+cvs = back.compute_soft_hand_value(player)
+back.is_value_threshold(player)
+print(f"is player bust? {player.bust}")
+print(cvs)
+
+
 
 #back.game_turn()
 #back.hit_or_stand()
