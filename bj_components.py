@@ -21,7 +21,7 @@ class DeckOfCards(object):
         num_cards_suite = 14
         cards = []
         for suite in ["spades", "clubs", "hearts", "diamonds"]:
-            value_suite = [[suite,x] for x in range(1,num_cards_suite)]
+            value_suite = [[suite,x] for x in range(2,num_cards_suite)]
             cards.append(value_suite)
         #flatten nested array
         cards = [item for sublist in cards for item in sublist]
@@ -36,23 +36,17 @@ class DeckOfCards(object):
     #TODO: clean up logic 
     #TODO: figure out why append the cards doesnt get the elements from self.cards 
     def get_card(self):
-        #picture_cards = {11:'jack', 12:'queen', 13:'king', 14:'ace'}
-        #the_cards = list()
+
         while len(self.cards) > 0:
             if len(self.cards) == 1:
                 the_card = self.cards.pop(0)
-                #the_cards.append(self.cards.pop(0))
                 return(the_card)
             else:
                 get_random = random.randint(0,len(self.cards))
                 while get_random == True:
                     the_card = self.cards.pop(get_random)
-                    #the_cards.append(self.cards.pop(get_random))
-                    #print(str(the_cards) + str(i))
                     if the_card[1] in self.picture_cards:
                         return([the_card[0],self.picture_cards.get(the_card[1])])
-                        
-                    #the_cards.append((the_cards[i][0],picture_cards.get(the_cards[i][1])))
                     return(the_card)
 
 #%%
@@ -60,20 +54,22 @@ class GameParticipant(object):
 
     """Base game participant class for holding data and shared functionality"""
 
-    def __init__(self, chips, cards):
+    def __init__(self, chips, cards, name):
         self.chips = chips
         self.cards = cards
         self.cards_value = 0
         self.soft_hand = False
         self.blackjack = False
         self.bust = False
+        self.standing = False
+        self.name = name
         
     def get_cards(self):
         return(self.cards)
     
     def pickup_card(self,card_from_deck):
         self.cards.append(card_from_deck)
-    
+        
     def clear_hand(self):
         self.cards.clear()
             
@@ -82,12 +78,13 @@ class GameParticipant(object):
 
 class Dealer(GameParticipant):  
 
-    """Dealer class - can hide a card""" 
+    """Dealer class - inherits from GameParticipant""" 
 
     def __init__(self, cards):
         self.cards = cards
         self.hidden_card = []
-        super(Dealer, self).__init__ (0, self.cards)
+        self.bet = 0
+        super(Dealer, self).__init__ (0, self.cards, "Dealer")
 
     def card_hidden(self):
         self.hidden_card = self.cards[-1]
@@ -100,16 +97,17 @@ class Player(GameParticipant):
 
     """Player specific functionality - place a bet, stand""" 
 
-    def __init__(self, chips):
+    def __init__(self, chips, name):
         self.cards = []
         self.chips = chips
-        super(Player, self).__init__(self.chips, self.cards)
-        self.standing = False
+        self.bet = 0
+        super(Player, self).__init__(self.chips, self.cards, name)
 
-    #Place bet
+    #Place bet 
     def place_bet(self,bet_amount):
         if bet_amount <= self.chips:
-            return (bet_amount)
+            self.bet = bet_amount
+            return(bet_amount)
         else:
             return ("Not enough chips")
     
