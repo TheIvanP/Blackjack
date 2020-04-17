@@ -10,11 +10,14 @@ class GameBackend(object):
         self.deck = deck
         self.frontend = frontend
 
-    def dont_try_again(self, player):
-        answer = self.frontend.player_input(self.frontend.retry())
+    def try_again(self, player):
+        self.frontend.retry()
+        answer = self.frontend.player_input()
         if answer in ["Yes", "y", "yes"]:
+            player.try_again = True
             return(True)
         else:
+            player.try_again = False
             return(False)
 
     def enter_name(self,player):
@@ -26,27 +29,29 @@ class GameBackend(object):
         amount = player.place_bet(int(self.frontend.player_input()))
         if isinstance(amount,int):
             self.chips_on_table = amount
-            return(True)
+            player.bet_too_high = False
         else:
             self.frontend.bet_high(player.chips)
-            return(False)
     
-    def deal_cards_start(self):
+    def deal_cards_start(self, player, dealer):
         for i in range(2):
-            self.player.pickup_card(self.deck.get_card())
-            self.dealer.pickup_card(self.deck.get_card())
+            self.pick_a_card(player, False)
+            self.pick_a_card(dealer, False)
         self.dealer.card_hidden()
 
     #duplicates other functions to get card hit, pickup_card
-    def pick_a_card(self,participant):
+    def pick_a_card(self,participant,report):
         card = self.deck.get_card()
         participant.pickup_card(card)
-        self.frontend.card_pulled(card,participant.name)
+        if report:
+            self.frontend.card_pulled(card,participant.name)
                 
     def is_value_threshold(self,game_participant):
         #Defauling to player value
         value_threshold = 21
         
+        self.compute_card_value(game_participant)
+
         if game_participant.cards_value > value_threshold and game_participant.soft_hand == False:
             game_participant.bust = True
         elif game_participant.cards_value > value_threshold and game_participant.soft_hand == True: 
@@ -58,29 +63,20 @@ class GameBackend(object):
         else:
             return(False)
 
-    #TODO: decide where the game turn happens - main or here?
-    def game_turn(self, player):        
-        if not self.player.standing: 
-            self.frontend.report_cards(self.player,self.dealer)
-            self.hit_or_stand(player)
-            value = self.compute_card_value(player)
-            self.frontend.cards_value(player, value)
-            self.is_value_threshold(player)
-        else:
-            self.frontend.report_cards(self.player,self.dealer)
-            self.frontend.card_reveal(self.dealer)
-            self.dealer.card_reveal()
-            self.frontend.report_cards(self.player,self.dealer)
-
     def test_bust(self,participant):
         if participant.bust == True:
-            self.frontend.player_bust(participant,self.compute_card_value(participant),participant.bet)
+            self.frontend.player_bust(participant,participant.cards_value,participant.bet)
     
     def has_dealer_won(self,player,dealer):
         if dealer.cards_value > player.cards_value & dealer.bust == False:
-            print("House wins")
             return(True)
     
+    def player_wins(self,player):
+        self.frontend.player_win(player)
+        self.player.has_won = True
+        player.chips += 2 * self.chips_on_table
+        print(player.chips)
+
     def should_dealer_stand(self):
         if self.dealer.cards_value >= 17:
             self.dealer.standing = True
@@ -89,9 +85,9 @@ class GameBackend(object):
         self.frontend.hit_stand()
         answer = self.frontend.player_input()
 
-        #TODO:move input handling to front end
+        #TODO:move input handling to front end, fuzzy strings 
         if answer in ["Hit", "hit", "hi"]:
-            self.pick_a_card(player)
+            self.pick_a_card(player, True)
         elif answer in ["Stand", "stand", "sta"]:
             self.player.stand(True)
         

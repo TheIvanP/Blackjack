@@ -54,22 +54,36 @@ class GameParticipant(object):
 
     """Base game participant class for holding data and shared functionality"""
 
-    def __init__(self, chips, cards, name):
+    def __init__(self, chips, name):
         self.chips = chips
-        self.cards = cards
+        self.cards = []
         self.cards_value = 0
         self.soft_hand = False
         self.blackjack = False
         self.bust = False
         self.standing = False
         self.name = name
-        
+        self.try_again = True
+        self.has_won = False
+        self.bet_too_high = True
+
+    def initialize(self):
+        self.cards = []
+        self.cards_value = 0 
+        self.soft_hand = False
+        self.blackjack = False
+        self.bust = False
+        self.standing = False
+        self.try_again = True
+        self.has_won = False
+        self.bet_too_high = True
+
     def get_cards(self):
         return(self.cards)
     
     def pickup_card(self,card_from_deck):
         self.cards.append(card_from_deck)
-        
+                
     def clear_hand(self):
         self.cards.clear()
             
@@ -80,11 +94,10 @@ class Dealer(GameParticipant):
 
     """Dealer class - inherits from GameParticipant""" 
 
-    def __init__(self, cards):
-        self.cards = cards
+    def __init__(self):
         self.hidden_card = []
         self.bet = 0
-        super(Dealer, self).__init__ (0, self.cards, "Dealer")
+        super(Dealer, self).__init__ (0, "Dealer")
 
     def card_hidden(self):
         self.hidden_card = self.cards[-1]
@@ -98,15 +111,15 @@ class Player(GameParticipant):
     """Player specific functionality - place a bet, stand""" 
 
     def __init__(self, chips, name):
-        self.cards = []
         self.chips = chips
         self.bet = 0
-        super(Player, self).__init__(self.chips, self.cards, name)
+        super(Player, self).__init__(self.chips, name)
 
     #Place bet 
     def place_bet(self,bet_amount):
         if bet_amount <= self.chips:
             self.bet = bet_amount
+            self.chips -= bet_amount
             return(bet_amount)
         else:
             return ("Not enough chips")
