@@ -1,9 +1,7 @@
-#%%
 import bj_components as gc
 import bj_frontend as fe
 import bj_backend as be
 import time
-#%%
 #main game 
 #Setup game
 

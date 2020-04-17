@@ -6,7 +6,7 @@ class GameFrontend(object):
     #TODO: parse this from json stored on dist instead to enable localislation. Investigate if it's possible to 'translate on the fly' from requested language
     #TODO: fuzzy strings to handle input 
     comms_strings = {
-        "report_cards": "'s cards are: ",
+        "report_cards": ["'s cards are: "," and "],
         "s_hit_stand": "Do you hit or do you stand?",
         "s_bet_amount": ", how much do you want to bet?",
         "s_card_reveal": "Dealer's hidden card is: ",
@@ -37,8 +37,8 @@ class GameFrontend(object):
 
     def report_cards(self, player, dealer):
         pstring = self.comms_strings.get("report_cards")
-        p_cards = f"{player.name}{pstring}{player.cards[0]} and {player.cards[1]}"
-        d_cards = f"{dealer.name}{pstring}{dealer.cards[0]} and {dealer.cards[1]}"
+        p_cards = f"{player.name}{pstring[0]}{player.cards[0]}{pstring[1]}{player.cards[1]}"
+        d_cards = f"{dealer.name}{pstring[0]}{dealer.cards[0]}{pstring[1]}{dealer.cards[1]}"
         print("")
         print(self.clean_strings(f"{p_cards}"))
         print(self.clean_strings(f"{d_cards}"))
