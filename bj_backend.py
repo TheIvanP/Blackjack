@@ -23,6 +23,13 @@ class GameBackend(object):
     def enter_name(self,player):
         self.frontend.p_name()
         player.name = self.frontend.player_input()
+    
+    def blackjack(self, participant):
+        if self.compute_card_value(participant) == 21:
+            participant.blackjack = True
+            return True
+        else:
+            return False
 
     def request_bet(self, player):
         self.frontend.bet_amount(player.name)
@@ -72,10 +79,14 @@ class GameBackend(object):
             return(True)
     
     def player_wins(self,player):
-        self.frontend.player_win(player)
         self.player.has_won = True
-        player.chips += 2 * self.chips_on_table
-        print(player.chips)
+        payout_multiplier = 2
+        if player.blackjack:
+            self.frontend.player_win(player)
+            payout_multiplier = 3
+        else:
+            self.frontend.player_win(player)  
+        player.chips += payout_multiplier * self.chips_on_table
 
     def should_dealer_stand(self):
         if self.dealer.cards_value >= 17:

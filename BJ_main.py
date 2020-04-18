@@ -22,23 +22,33 @@ def players_turn():
     dealer.initialize()
     player.initialize()
 
-    back.deal_cards_start(player,dealer)
     ux.report_chips(player)
-    ux.report_cards(player,dealer)
 
+    player.cards = [['ace', 'spades'],['hearts', 'queen']]
     while player.bet_too_high:
         back.request_bet(player)
-    
+
+    back.deal_cards_start(player,dealer)
+    player.cards = [['spades','ace'],['hearts', 'queen']]
+
+    ux.report_cards(player,dealer)
+
+    if back.blackjack(player):
+        player_win()
+
+
     #while the player still has chips and wants another hit
     while not player.standing and not player.bust:
         back.hit_or_stand(player)
         back.is_value_threshold(player)
         back.frontend.cards_value(player, player.cards_value)
         time.sleep(1)
+
         back.test_bust(player)
         if player.bust:
             back.try_again(player)
             main_game_loop()
+        
         elif player.standing == True:
             player_standing()
 

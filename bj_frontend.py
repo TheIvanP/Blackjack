@@ -14,7 +14,7 @@ class GameFrontend(object):
         "soft hand": "we have an ace on the hand which can be worth either 11 or 1",
         "cards_value": ["the value of", "'s cards are: "],
         "card_pulled":  [" pulls ","from the deck. "],
-        "player_wins": ["Contratulations ", "you won the game"],
+        "player_wins": ["Congratulations ", " you won the game", "Blackjack - house pays 2 to 3!"],
         "name": ["Please enter your name"],
         "bet_high": "Sorry, you can't afford that bet, you have: ",
         "retry": "Do you want to bet again?",
@@ -50,7 +50,10 @@ class GameFrontend(object):
     
     def player_win(self,player):
         w_str = self.comms_strings.get("player_wins")
-        print(f"{w_str[0]} {player.name} {w_str[1]}")
+        if player.blackjack:
+            print(f"{w_str[2]}{w_str[0]}{player.name}{w_str[1]}")        
+        else:
+            print(f"{w_str[0]} {player.name} {w_str[1]}")
 
     def player_bust(self, player, value, chips):
         b_str = self.comms_strings.get("bust")
