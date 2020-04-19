@@ -24,18 +24,14 @@ def players_turn():
 
     ux.report_chips(player)
 
-    player.cards = [['ace', 'spades'],['hearts', 'queen']]
     while player.bet_too_high:
         back.request_bet(player)
 
     back.deal_cards_start(player,dealer)
-    player.cards = [['spades','ace'],['hearts', 'queen']]
-
     ux.report_cards(player,dealer)
 
     if back.blackjack(player):
         player_win()
-
 
     #while the player still has chips and wants another hit
     while not player.standing and not player.bust:
@@ -77,9 +73,9 @@ def main_game_loop():
 def dealers_turn():
     #If dealer hasn't gone bust or standing on/after 17
     while not dealer.standing or not dealer.bust:
-        ux.report_cards(player,dealer)
         back.should_dealer_stand()
         back.pick_a_card(dealer, True)
+        ux.report_cards(player,dealer)
         back.is_value_threshold(dealer)
         back.test_bust(dealer)
         time.sleep(1)
