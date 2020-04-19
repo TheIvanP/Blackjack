@@ -75,7 +75,7 @@ class GameBackend(object):
             self.frontend.player_bust(participant,participant.cards_value,participant.bet)
     
     def has_dealer_won(self,player,dealer):
-        if dealer.cards_value > player.cards_value & dealer.bust == False:
+        if dealer.cards_value > player.cards_value:
             return(True)
     
     def player_wins(self,player):
