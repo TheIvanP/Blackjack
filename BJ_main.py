@@ -8,13 +8,14 @@ import time
 #Dealer and player classes 
 dealer = gc.Dealer()
 player = gc.Player(50,"Player 1")
-
+ 
 #Deck of cards, front end for communicating with player, back end for functionality
 dek = gc.DeckOfCards()
 ux = fe.GameFrontend()
 back = be.GameBackend(player,dealer,dek,ux)
 
 #Enter player name 
+back.set_language()
 back.enter_name(player)
 
 #Game loop for player's turn 
