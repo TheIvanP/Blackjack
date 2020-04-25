@@ -1,35 +1,21 @@
 from translate import Translator
 from fuzzywuzzy import fuzz
+import json
 
 class GameFrontend(object):
 
     """Game frontend class for basic terminal based UX with minimal functionality to improve modularity 
-    text content is stored in class variable dict 
-    """
-
-    #TODO: parse this from json stored on dist instead to enable custom respons sets (I.e. personalities). Investigate if it's possible to 'translate on the fly' from requested language
-    #TODO: fuzzy strings to handle input 
-    comms_strings = {
-        "report_cards": ["'s cards are: "," and "],
-        "s_hit_stand": "Do you hit or do you stand?",
-        "s_bet_amount": ", how much do you want to bet?",
-        "s_card_reveal": "Dealer's hidden card is: ",
-        "bust": ["Ooops, ", " your cards' value is: ", "which is more than 21 - you've gone bust and lost "],
-        "soft hand": "we have an ace on the hand which can be worth either 11 or 1",
-        "cards_value": ["the value of", "'s cards are: "],
-        "card_pulled":  [" pulls ","from the deck. "],
-        "player_wins": ["Congratulations ", " you won the game", "Blackjack - house pays 2 to 3!"],
-        "name": ["Please enter your name"],
-        "bet_high": "Sorry, you can't afford that bet, you have: ",
-        "retry": "Do you want to bet again?",
-        "report_chips": ["Player has"," chips"],
-        "ask_language": ["Welcome, please enter the ISO 639 (en,es,zh etc.) code for the language would you like me to speak?", "language is set to: "]
-        }
-    
+    ability change game 'personality' via setting personality attribute on class creation 
+    tanslation using Translator / google translate api
+    """    
     language = 'en'
 
-    def __init__(self):
-        pass
+    def __init__(self, personality = "neutral"):
+        self.personality = personality
+        self.comms_strings = dict()
+        self.personalities = {"neutral":"dialogue_neutral.json"}
+        with open(self.personalities.get(self.personality)) as f:
+            self.comms_strings = json.load(f)
 
     def translate_p_output(self, response):
         # https://en.wikipedia.org/wiki/ISO_639-1 for languages
