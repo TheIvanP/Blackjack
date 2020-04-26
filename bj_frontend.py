@@ -10,6 +10,7 @@ class GameFrontend(object):
     """    
     language = 'en'
 
+    #TODO: self.personalities should find dialogue json files in root and create the dict from this data to allow players to add their own
     def __init__(self, personality = "neutral"):
         self.personality = personality
         self.comms_strings = dict()
