@@ -97,9 +97,10 @@ class GameBackend(object):
         l = range(0,pmax)
         num_pers = list(zip(l,self.frontend.personalities.keys()))
         self.frontend.what_personalities(num_pers)
-   
+        #if no valid response leave personality at current setting
         response = self.frontend.player_input_number()
         if response < pmax:
+            #get index 1 from zipped list of personalities
             getres = num_pers[response][1]
             pkeys = list(self.frontend.personalities.keys())
             self.frontend.personality = pkeys[response]
