@@ -11,12 +11,13 @@ player = gc.Player(50,"Player 1")
  
 #Deck of cards, front end for communicating with player, back end for functionality
 dek = gc.DeckOfCards()
-ux = fe.GameFrontend()
+ux = fe.GameFrontend(personality='neutral')
 back = be.GameBackend(player,dealer,dek,ux)
 
 #Enter player name 
 back.set_language()
 back.enter_name(player)
+back.request_personality()
 
 #Game loop for player's turn 
 def players_turn(): 

@@ -92,6 +92,20 @@ class GameBackend(object):
         if dealer.cards_value > player.cards_value:
             return(True)
     
+    def request_personality(self):
+        pmax = len(self.frontend.personalities)
+        l = range(0,pmax)
+        num_pers = list(zip(l,self.frontend.personalities.keys()))
+        self.frontend.what_personalities(num_pers)
+   
+        response = self.frontend.player_input_number()
+        if response < pmax:
+            getres = num_pers[response][1]
+            pkeys = list(self.frontend.personalities.keys())
+            self.frontend.personality = pkeys[response]
+            self.frontend.retrive_personality()
+            print(getres)
+    
     #player has won - if player has blackjack pay out 2:3 
     def player_wins(self,player):
         self.player.has_won = True

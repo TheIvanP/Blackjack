@@ -1,0 +1,41 @@
+{
+   "report_cards":[
+      ", let's see the gun: ",
+      " and "
+   ],
+   "s_hit_stand":"You've got to ask yourself one question: do you feel lucky? Do you hit or Stand?",
+   "s_bet_amount":", — you willing to take how many chips to him?",
+   "s_card_reveal":"Dealer's hidden card is: ",
+   "bust":[
+      "Hey, ",
+      " it'll hurt. For ",
+      "which is more than 21 - let it hurt. "
+   ],
+   "soft hand":"we have an ace on the hand which can be worth either 11 or 1",
+   "cards_value":[
+      "What's in the bag, ",
+      " ?"
+   ],
+   "card_pulled":[
+      " is checking on the slug. We're pretty sure it's a ",
+      "seven lands and grooves, right-hand twist. "
+   ],
+   "player_wins":[
+      "Go ahead,",
+      ", make my day.",
+      "Magnum, the most powerful handgun in the world, and would blow your head clean off - house pays 2 to 3!"
+   ],
+   "name":[
+      "Why do they call ya: "
+   ],
+   "bet_high":"I know what you're thinking. 'Did he fire six shots or only five'? Well to tell you the truth, in all this excitement, i kind of lost track myself. you have: ",
+   "retry":"Try again? Well, do ya, punk?",
+   "report_chips":[
+      "To the City of San Francisco — You have double-crossed me for the last time. I'm warning you to have my ",
+      " dollars and a jet airplane ready and waiting."
+   ],
+   "ask_language":[
+      "Welcome, please enter the ISO 639 (en,es,zh etc.) code for the language would you like me to speak?",
+      "language is set to: "
+   ]
+}

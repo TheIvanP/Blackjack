@@ -13,7 +13,10 @@ class GameFrontend(object):
     def __init__(self, personality = "neutral"):
         self.personality = personality
         self.comms_strings = dict()
-        self.personalities = {"neutral":"dialogue_neutral.json"}
+        self.personalities = {"neutral":"dialogue_neutral.json", "dirty harry":"dialogue_dharry.json"}
+        self.retrive_personality()
+    
+    def retrive_personality(self):
         with open(self.personalities.get(self.personality)) as f:
             self.comms_strings = json.load(f)
 
@@ -69,6 +72,13 @@ class GameFrontend(object):
         else:
             self.translate_p_output(f"{w_str[0]} {player.name} {w_str[1]}")
 
+    #takes a zipped list indexing the dict containing personalities to communicate number choices back to player
+    def what_personalities(self,num_pers):
+        #[x for x in self.personalities.keys()]
+        tp = f"What personality? {num_pers}"
+        tp = self.clean_strings(tp)
+        print(tp)
+
     def player_bust(self, player, value, chips):
         b_str = self.comms_strings.get("bust")
         self.translate_p_output(f"{b_str[0]}{player.name}{b_str[1]} {value} {b_str[2]}{chips}")
@@ -98,11 +108,13 @@ class GameFrontend(object):
                         if di > 80:
                             done=True
                             return m
+                            
                 else:
                     r = fuzz.ratio(response,match)
                     if r > 80:
                         done = True
                         return match
+                        
             else:
                 try:
                     response = str(input())
